@@ -5,21 +5,26 @@ import { scaleBand, scaleLinear } from "@visx/scale";
 import { Group } from "@visx/group";
 import { AxisLeft, AxisBottom } from "@visx/axis";
 import { Bar } from "@visx/shape";
-import { defaultStyles, useTooltip, TooltipWithBounds } from "@visx/tooltip";
+import { defaultStyles, useTooltip, Tooltip } from "@visx/tooltip";
 import { localPoint } from "@visx/event";
-import { TouchEvent, MouseEvent } from "react";
+import { TouchEvent, MouseEvent, useState } from "react";
 import "../css/BarChart.css";
-const data = applestock.slice(0, 20);
 
-const margin = 64;
+const data = applestock.slice(0, 10);
+
+const margin = 32;
 
 const defaultWidth = 100;
 const defaultHeight = 100;
 const textColor = "#e4dbd8";
+const barOddColor = "#FFB3D9"
+const barEvenColor = "#EAEAEA"
+const barOddColorHover = "#f7d0e3"
+const barEvenColorHover = "#ffffff"
 const toolTipStyles = {
   ...defaultStyles,
   borderRadius: 4,
-  background: "#1c2a3f",
+  background: "#446595",
   color: textColor,
 };
 
@@ -29,6 +34,8 @@ const tickLabelProps = {
   fontSize: 12,
   fontFamily: "sans-serif",
 } as const;
+
+
 export function BarChart() {
   const [ref, bounds] = useMeasure();
   const { showTooltip, hideTooltip, tooltipLeft, tooltipTop, tooltipData } =
@@ -60,8 +67,10 @@ export function BarChart() {
       Math.max(...data.map(getYValue)) + 1,
     ],
   });
+
+  const [hoveredIndex, setHoveredIndex] = useState(-1)
   return (
-    <div className="barchart-container">
+      <>
       <svg
         ref={ref}
         width="100%"
@@ -73,9 +82,10 @@ export function BarChart() {
             const xValue = getXValue(d);
             const barWidth = xScale.bandwidth();
             const barHeight = innerHeight - (yScale(getYValue(d)) ?? 0);
-            const barX = xScale(xValue);
+            const barX = xScale(xValue) || 0;
             const barY = innerHeight - barHeight;
-            const fillColor = isOdd(index) ? "#FFB3D9" : "#EAEAEA";
+            const fillColor = isOdd(index) ? barOddColor : barEvenColor;
+            const hoverColor = isOdd(index) ? barOddColorHover : barEvenColorHover;
             return (
               <Bar
                 key={`bar-${xValue}`}
@@ -84,17 +94,23 @@ export function BarChart() {
                 y={barY}
                 width={barWidth}
                 height={barHeight}
-                fill={fillColor}
-                onMouseLeave={() => hideTooltip()}
+                fill={index===hoveredIndex? hoverColor : fillColor}
+                onMouseLeave={() => {
+                    setHoveredIndex(-1)
+                    hideTooltip()
+                }}
                 onMouseMove={(
                   e: TouchEvent<SVGRectElement> | MouseEvent<SVGRectElement>
                 ) => {
+                  setHoveredIndex(index)
                   const point = localPoint(e);
                   if (!point) return;
+                  const barCenterX = barX + barWidth / 2;
+                  const barCenterY = barY + barHeight / 2;
                   showTooltip({
                     tooltipData: d,
-                    tooltipLeft: point.x,
-                    tooltipTop: point.y,
+                    tooltipLeft: barCenterX + bounds.left,
+                    tooltipTop: barCenterY + bounds.top,
                   });
                 }}
               />
@@ -121,7 +137,7 @@ export function BarChart() {
         </Group>
       </svg>
       {tooltipData ? (
-        <TooltipWithBounds
+        <Tooltip
           key={Math.random()}
           top={tooltipTop}
           left={tooltipLeft}
@@ -130,8 +146,8 @@ export function BarChart() {
           <b>Date</b> : {getXValue(tooltipData)}
           <br></br>
           <b>Closing Price</b> : {getYValue(tooltipData)}
-        </TooltipWithBounds>
+        </Tooltip>
       ) : null}
-    </div>
+    </>
   );
 }

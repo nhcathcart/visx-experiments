@@ -1,0 +1,21 @@
+.pie-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5%;
+    width: 50%;
+    height: 50%;
+    border-radius: 10px;
+    background-color: #39537b;
+}
+.bar-container{
+    display: flex;
+    justify-content: center;
+    align-items: cnether;
+    width: 50%;
+    height: 50%;
+    margin-top: 2%;
+    padding: 5%;
+    border-radius: 10px;
+    background-color: #39537b;
+}

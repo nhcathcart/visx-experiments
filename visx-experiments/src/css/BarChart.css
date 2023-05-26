@@ -7,3 +7,19 @@
 .axis-left{
     color: white
 }
+
+.chart-even{
+    background-color: #EAEAEA;
+}
+.chart-odd{
+    background-color: #FFB3D9
+}
+.chart-even-darker{
+    background-color: #EDEAEA
+}
+.chart-odd-darker{
+    background-color: #f7d0e3
+}
+.tooltipbackground{
+    background-color: #446595
+}
